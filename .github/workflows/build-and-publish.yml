@@ -14,6 +14,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Clean dist folder
+      run: rm -rf ./dist
+
     - name: Install NPM dependencies
       run: npm install
 
@@ -42,6 +45,12 @@ jobs:
       name: github-pages
       url: ${{steps.deployment.outputs.page_url}}
     steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: .
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
