@@ -4,6 +4,8 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // Set base to repo name for GitHub Pages
+  base: '/KTaNE_Tool/',
   plugins: [vue(), VitePWA({
     registerType: 'prompt',
     injectRegister: false,

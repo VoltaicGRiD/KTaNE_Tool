@@ -7,7 +7,9 @@
     "dev": "vite",
     "host": "vite --host --port 8888",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "vue": "^3.5.13"
@@ -20,7 +22,8 @@
     "vite": "^6.0.11",
     "vite-plugin-pwa": "^0.21.1",
     "vue-tsc": "^2.2.0",
-    "workbox-window": "^7.3.0"
+    "workbox-window": "^7.3.0",
+    "gh-pages": "^6.0.0"
   },
   "overrides": {
     "sharp": "0.32.6",
