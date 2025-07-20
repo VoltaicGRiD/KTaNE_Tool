@@ -4,7 +4,7 @@ import { ref, onMounted } from 'vue'
 const ktaneLogo = new URL('../assets/ktane-logo.png', import.meta.url).href
 
 const FAVORITES_KEY = 'ktane-favorites'
-const favorites = ref<string[]>([])
+const favorites = ref<{ name: string; link: string }[]>([])
 
 function loadFavorites() {
   const data = localStorage.getItem(FAVORITES_KEY)
@@ -15,19 +15,23 @@ function saveFavorites() {
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites.value))
 }
 
-function addFavorite(link: string) {
-  if (!favorites.value.includes(link)) {
-    favorites.value.push(link)
+function addFavorite(link: string, name?: string) {
+  if (
+    link &&
+    !favorites.value.some(fav => fav.link === link)
+  ) {
+    favorites.value.push({ name: name || link, link })
     saveFavorites()
   }
 }
 
 function removeFavorite(link: string) {
-  favorites.value = favorites.value.filter(l => l !== link)
+  favorites.value = favorites.value.filter(fav => fav.link !== link)
   saveFavorites()
 }
 
 const newFavorite = ref('')
+const newFavoriteName = ref('')
 
 onMounted(() => {
   loadFavorites()
@@ -49,26 +53,63 @@ const width = ref(window.innerWidth)
     <div class="favorites">
       
       <div class="button-group">
-        <input 
+        <input
+          v-model="newFavoriteName"
+          type="text"
+          placeholder="Name"
+        />
+        <input
           v-model="newFavorite"
           type="text"
-          placeholder="Add a favorite link"
-          @keyup.enter="addFavorite(newFavorite); newFavorite = ''"
+          placeholder="Link"
+          @keyup.enter="addFavorite(newFavorite, newFavoriteName); newFavorite = ''; newFavoriteName = ''"
         />
-        <button @click="addFavorite(newFavorite); newFavorite = ''">Add</button>
+        <button @click="addFavorite(newFavorite, newFavoriteName); newFavorite = ''; newFavoriteName = ''">Add</button>
       </div>
 
       <ul class="favorites-list">
-        <li class="favorite-item" v-for="link in favorites" :key="link">
-          <a :href="link" target="_blank" rel="noopener noreferrer">
-            {{
-            link.split('/').pop()?.split('.')[0]
-              .replace(/_/g, ' ')
-              .replace(/%20/g, ' ')
-              .replace(/\b\w/g, c => c.toUpperCase())
-            }}
+        <li class="favorite-item" v-for="fav in favorites" :key="fav.link">
+          <a :href="fav.link" target="_blank" rel="noopener noreferrer">
+            {{ fav.name }}
           </a>
-          <button @click="removeFavorite(link)">X</button>
+          <button @click="removeFavorite(fav.link)">X</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div v-else class="desktop-favorites">
+    <h1>Favorites</h1>
+    
+    <a href="https://ktane.timwi.de/" target="_blank" rel="noopener noreferrer" class="ktane-link">
+      <img :src="ktaneLogo" alt="KTaNE Logo" class="ktane-logo" />
+      <span class="ktane-link-text">KTaNE Module Repository</span>
+    </a>
+
+    <div class="favorites"> 
+      <div class="button-group">
+        <input
+          v-model="newFavoriteName"
+          class="favorite-input"
+          type="text"
+          placeholder="Name"
+        />
+        <input
+          v-model="newFavorite"
+          class="favorite-input"
+          type="text"
+          placeholder="Add a favorite link"
+          @keyup.enter="addFavorite(newFavorite, newFavoriteName); newFavorite = ''; newFavoriteName = ''"
+        />
+        <button @click="addFavorite(newFavorite, newFavoriteName); newFavorite = ''; newFavoriteName = ''">Add</button>
+      </div>
+
+      <ul class="favorites-list">
+        <li class="favorite-item" v-for="fav in favorites" :key="fav.link">
+          <a :href="fav.link" target="_blank" rel="noopener noreferrer">
+            {{ fav.name }}
+          </a>
+          <button @click="removeFavorite(fav.link)">X</button>
         </li>
       </ul>
     </div>

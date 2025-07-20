@@ -18,13 +18,44 @@ interface GlobalState {
   timer: any
   litIndicators: any
   unlitIndicators: any
+  timerEndTimestamp?: number | null
 }
 
 const globalState = inject<GlobalState>('globalState')!
 
 
+
+// Timer logic using persisted timestamp
 const timerInterval = ref<number | null>(null)
+// Use timerEndTimestamp in globalState for persistence
+if (globalState.timerEndTimestamp === undefined) {
+  globalState.timerEndTimestamp = null
+}
 const isTimerRunning = ref(false)
+const timerInput = ref(0) // For user input when timer is not running
+
+const remainingTime = ref(0)
+
+function updateRemainingTime() {
+  if (globalState.timerEndTimestamp && isTimerRunning.value) {
+    remainingTime.value = Math.max(0, Math.floor((globalState.timerEndTimestamp - Date.now()) / 1000))
+  } else {
+    remainingTime.value = 0
+  }
+}
+updateRemainingTime()
+
+// If timerEndTimestamp is in the future, resume timer on load
+if (globalState.timerEndTimestamp && globalState.timerEndTimestamp > Date.now()) {
+  isTimerRunning.value = true
+  updateRemainingTime()
+  timerInterval.value = window.setInterval(() => {
+    updateRemainingTime()
+    if (remainingTime.value <= 0) {
+      stopTimer()
+    }
+  }, 250)
+}
 
 const litIndicators = globalState.litIndicators
 const unlitIndicators = globalState.unlitIndicators
@@ -64,26 +95,38 @@ function resetAll() {
   // Note: Not clearing favorites as they should persist
 }
 
+
 function startTimer() {
-  if (!isTimerRunning.value) {
+  if (!isTimerRunning.value && timerInput.value > 0) {
     isTimerRunning.value = true
+    globalState.timerEndTimestamp = Date.now() + timerInput.value * 1000
+    updateRemainingTime()
     timerInterval.value = window.setInterval(() => {
-      globalState.timer.value--
-    }, 1000)
+      updateRemainingTime()
+      if (remainingTime.value <= 0) {
+        stopTimer()
+      }
+    }, 250)
   }
 }
 
+
 function stopTimer() {
-  if (timerInterval.value) {
+  if (timerInterval.value !== null) {
     clearInterval(timerInterval.value)
     timerInterval.value = null
-    isTimerRunning.value = false
   }
+  isTimerRunning.value = false
+  globalState.timerEndTimestamp = null
+  updateRemainingTime()
 }
+
 
 function resetTimer() {
   stopTimer()
-  globalState.timer.value = 0
+  timerInput.value = 0
+  globalState.timerEndTimestamp = null
+  updateRemainingTime()
 }
 
 function confirmReset() {
@@ -96,9 +139,10 @@ onUnmounted(() => {
   stopTimer()
 })
 
+
 // Provide timer data for child components
 provide('timer', {
-  value: globalState.timer,
+  value: remainingTime,
   isRunning: isTimerRunning,
   start: startTimer,
   stop: stopTimer,
@@ -158,7 +202,7 @@ window.addEventListener('resize', () => {
             <input 
               class="timer-input"
               type="number"
-              v-model="globalState.timer"
+              v-model="timerInput"
               placeholder="Timer (seconds)"
               min="0"
               step="30"
@@ -166,7 +210,7 @@ window.addEventListener('resize', () => {
             />
 
             <span class="timer-label" v-if="isTimerRunning">
-              {{ Math.floor(globalState.timer / 60).toString().padStart(2, '0') + ':' + (globalState.timer % 60).toString().padStart(2, '0') }}
+              {{ Math.floor(remainingTime / 60).toString().padStart(2, '0') + ':' + (remainingTime % 60).toString().padStart(2, '0') }}
             </span>
             
             <button 
@@ -222,7 +266,93 @@ window.addEventListener('resize', () => {
           </button>
         </div>
 
-        <div class="indicators">
+        <hr style="width: 100%; border: 1px solid #ccc;"/>
+
+        <div class="stats">
+          <span v-if="['A','E','I','O','U'].includes(globalState.serial[0])">Contains vowel</span>
+          <span>Sum of numbers: {{ globalState.serial.split('').reduce((acc: number, curr: string) => acc + (parseInt(curr) || 0), 0) }}</span>
+          <span>Product of numbers: {{ globalState.serial.split('').reduce((acc: number, curr: string) => acc * (parseInt(curr) || 1), 1) }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="desktop-template" v-else>
+      <div class="column">
+        <BatteryGroup
+          :dBatt="globalState.dBatt"
+          :aaBatt="globalState.aaBatt"
+          :volt="globalState.volt"
+          @update:dBatt="globalState.dBatt = $event"
+          @update:aaBatt="globalState.aaBatt = $event"
+          @update:volt="globalState.volt = $event"
+        ></BatteryGroup>
+
+        <div class="button-group strikes-group">
+          <button class="decrement" type="button" @click="globalState.strikes--">-</button>
+          <span>Strikes: {{ globalState.strikes }}</span>
+          <button class="increment" type="button" @click="globalState.strikes++">+</button>
+        </div>
+      </div>
+
+      <div class="center">
+        <div class="column">
+          <input
+            class="serial-input"
+            type="text"
+            v-model="globalState.serial"
+            placeholder="Serial Number"
+            maxlength="6"
+          />
+
+          <div class="row">
+            <input 
+              class="timer-input"
+              type="number"
+              v-model="timerInput"
+              placeholder="Timer (seconds)"
+              min="0"
+              step="30"
+              v-if="!isTimerRunning"
+            />
+
+            <span class="timer-label" v-if="isTimerRunning">
+              {{ Math.floor(remainingTime / 60).toString().padStart(2, '0') + ':' + (remainingTime % 60).toString().padStart(2, '0') }}
+            </span>
+            
+            <button 
+              class="start-timer" 
+              @click="isTimerRunning ? stopTimer() : startTimer()"
+            >
+              {{ isTimerRunning ? 'Stop' : 'Start' }}
+            </button>
+            
+            <button 
+              class="reset-timer" 
+              @click="resetTimer()"
+            >
+              Reset
+            </button>
+          </div>
+            
+          <button
+          class="reset-all"
+          type="button"
+          @click="confirmReset"
+          >
+          Reset All
+          </button>
+        </div>
+
+        <div class="button-group">
+          <button class="add-lit-indicator" type="button" @click="openIndicatorModal(true)">
+            Add Lit Indicator
+          </button>
+
+          <button class="add-unlit-indicator" type="button" @click="openIndicatorModal(false)">
+            Add Unlit Indicator
+          </button>
+        </div>
+
+                <div class="indicators">
           <h2>Lit Indicators</h2>
           <ul class="lit-indicators">
             <li
@@ -251,86 +381,25 @@ window.addEventListener('resize', () => {
             </li>
           </ul>
         </div>
-
-        <hr style="width: 100%; border: 1px solid #ccc;"/>
-
-        <div class="stats">
-          <span v-if="['A','E','I','O','U'].includes(globalState.serial[0])">Contains vowel</span>
-          <span>Sum of numbers: {{ globalState.serial.split('').reduce((acc: number, curr: string) => acc + (parseInt(curr) || 0), 0) }}</span>
-          <span>Product of numbers: {{ globalState.serial.split('').reduce((acc: number, curr: string) => acc * (parseInt(curr) || 1), 1) }}</span>
-        </div>
-      </div>
-    </div>
-    <div class="desktop-template" v-else>
-      <div class="battery-group">
-        <div class="button-group">
-          <button class="decrement" type="button" @click="globalState.dBatt--">-</button>
-          <span>D Battery: {{ globalState.dBatt }}</span>
-          <button class="increment" type="button" @click="globalState.dBatt++">+</button>
-        </div>
-
-        <div class="button-group">
-          <button class="decrement" type="button" @click="globalState.aaBatt--">-</button>
-          <span>AA Battery: {{ globalState.aaBatt }}</span>
-          <button class="increment" type="button" @click="globalState.aaBatt++">+</button>
-        </div>
-
-        <div class="button-group">
-          <button class="decrement" type="button" @click="globalState.volt--">-</button>
-          <span>Voltage: {{ globalState.volt }}</span>
-          <button class="increment" type="button" @click="globalState.volt++">+</button>
-        </div>
       </div>
 
-      <div class="center">
-        <input
-          class="serial-input"
-          type="text"
-          v-model="globalState.serial"
-          placeholder="Serial Number"
-          maxlength="6"
-        />
+      <PortsGroup
+        :DVI="globalState.ports.DVI"
+        :Parallel="globalState.ports.Parallel"
+        :Serial="globalState.ports.Serial"
+        :PS2="globalState.ports.PS2"
+        :RJ45="globalState.ports.RJ45"
+        :RCA="globalState.ports.RCA"
+        :EMPTY="globalState.ports.EMPTY"
+        @update:DVI="globalState.ports.DVI = $event"
+        @update:Parallel="globalState.ports.Parallel = $event"
+        @update:Serial="globalState.ports.Serial = $event"
+        @update:PS2="globalState.ports.PS2 = $event"
+        @update:RJ45="globalState.ports.RJ45 = $event"
+        @update:RCA="globalState.ports.RCA = $event"
+        @update:EMPTY="globalState.ports.EMPTY = $event"
+      ></PortsGroup>
 
-        <div class="button-group">
-          <button class="add-lit-indicator" type="button" @click="openIndicatorModal(true)">
-            Add Lit Indicator
-          </button>
-
-          <button class="add-unlit-indicator" type="button" @click="openIndicatorModal(false)">
-            Add Unlit Indicator
-          </button>
-        </div>
-
-        <div class="indicators">
-          <h2>Lit Indicators</h2>
-          <ul class="lit-indicators">
-            <li class="lit" v-for="ind in litIndicators" :key="ind">{{ ind }}</li>
-          </ul>
-
-          <h2>Unlit Indicators</h2>
-          <ul class="unlit-indicators">
-            <li class="unlit" v-for="ind in unlitIndicators" :key="ind">{{ ind }}</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="port-group">
-        <label v-for="(count, port) in globalState.ports" :key="port">
-          <div class="button-group">
-            <button
-              class="decrement"
-              type="button"
-              @click="globalState.ports[port]--"
-            >-</button>
-            <span>{{ port }}: {{ count }}</span>
-            <button
-              class="increment"
-              type="button"
-              @click="globalState.ports[port]++"
-            >+</button>
-          </div>
-        </label>
-      </div>
     </div>
 </template>
 <style scoped>
@@ -355,9 +424,11 @@ window.addEventListener('resize', () => {
 }
 
 .desktop-template {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
   gap: 1rem;
+  align-items: flex-start;
 }
 
 .row {
@@ -376,13 +447,7 @@ window.addEventListener('resize', () => {
   align-items: center;
 }
 
-@media (max-width: 700px) {
-  .desktop-template {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
+@media (max-width: 700px) {  
   .row {
     flex-direction: row;
     gap: 0.5rem;
