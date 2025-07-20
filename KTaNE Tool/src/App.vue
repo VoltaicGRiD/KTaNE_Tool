@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import MainScreen from './components/MainScreen.vue'
 import PWABadge from './components/PWABadge.vue'
+import HorizontalScrollContainer from './components/HorizontalScrollContainer.vue'
+
+// Set to true to use horizontal scrolling, false for the current layout
+const useHorizontalScrolling = true
 </script>
 
 <template>
-  <HelloWorld msg="KTaNE Tool" />
-  <PWABadge />
+  <div v-if="useHorizontalScrolling">
+    <HorizontalScrollContainer />
+    <PWABadge />
+  </div>
+  <div v-else>
+    <MainScreen msg="KTaNE Tool" />
+    <PWABadge />
+  </div>
 </template>
 
 <style scoped>
