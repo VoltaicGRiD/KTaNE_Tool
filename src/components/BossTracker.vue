@@ -37,13 +37,29 @@ function clearTrackers() {
 
 const width = ref(window.innerWidth)
 
+// Automatically resize the textarea to fit its content (for mobile)
+function autoResizeMobile(event: Event) {
+  const target = event.target as HTMLTextAreaElement
+  if (target) {
+    target.style.height = 'auto'
+    target.style.height = target.scrollHeight + 'px'
+  }
+}
+
 </script>
 <template>
   <div v-if="width < 600" >
     <h1>{{ msg }}</h1>
     <div class="boss-tracker">
       <input v-model="newTrackerName" placeholder="New Tracker Name" />
-      <input v-model="newTrackerState" placeholder="New Tracker State" />
+      <textarea
+        aria-multiline="true"
+        v-model="newTrackerState"
+        placeholder="New Tracker State"
+        ref="mobileNewTrackerState"
+        @input="autoResizeMobile"
+        style="overflow:hidden; min-height: 50px; resize: none; width: 100%;"
+      />
       <button @click="addTracker">Add Tracker</button>
 
       <ul>
@@ -55,7 +71,7 @@ const width = ref(window.innerWidth)
               <button class="remove-state-button" @click="removeState(tracker, state)">X</button>
             </li>
             <li>
-              <input v-model="newTrackerState" placeholder="New State" />
+              <textarea aria-multiline="true" style="height: 50px; width: 100%" v-model="newTrackerState" placeholder="New Tracker State" />
               <button @click="addState(tracker)">Add State</button>
             </li>
           </ul>
@@ -71,7 +87,13 @@ const width = ref(window.innerWidth)
     
     <div class="desktop-tracker-buttons">
       <input v-model="newTrackerName" placeholder="New Tracker Name" />
-      <input v-model="newTrackerState" placeholder="New Tracker State" />
+      <textarea
+        aria-multiline="true"
+        v-model="newTrackerState"
+        placeholder="New Tracker State"
+        @input="autoResizeMobile"
+        style="overflow:hidden; min-height: 50px; resize: none; width: 100%;"
+      />
       <button @click="addTracker">Add Tracker</button>
       <button @click="clearTrackers">Clear All Trackers</button>
     </div>
@@ -85,7 +107,7 @@ const width = ref(window.innerWidth)
             <button class="remove-state-button" @click="removeState(tracker, state)">X</button>
           </li>
           <li>
-            <input v-model="newTrackerState" placeholder="New State" />
+            <textarea aria-multiline="true" style="height: 50px; width: 100%" v-model="newTrackerState" placeholder="New Tracker State" />
             <button @click="addState(tracker)">Add State</button>
           </li>
         </ul>

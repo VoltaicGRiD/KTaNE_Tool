@@ -39,11 +39,18 @@ export const globalState = reactive(loadState())
 
 export function resetGlobalState() {
   (Object.keys(defaultState) as (keyof GlobalState)[]).forEach(key => {
-    (globalState[key] as typeof defaultState[typeof key]) = Array.isArray(defaultState[key])
-      ? []
-      : typeof defaultState[key] === 'object' && defaultState[key] !== null
-        ? { ...defaultState[key] }
-        : defaultState[key]
+    if (Array.isArray(defaultState[key])) {
+      (globalState[key] as unknown[]).splice(0, (globalState[key] as unknown[]).length, ...(defaultState[key] as unknown[]))
+    } else if (
+      typeof defaultState[key] === 'object' &&
+      defaultState[key] !== null &&
+      typeof globalState[key] === 'object' &&
+      globalState[key] !== null
+    ) {
+      Object.assign(globalState[key], defaultState[key])
+    } else {
+      (globalState[key] as typeof defaultState[typeof key]) = defaultState[key]
+    }
   })
   localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultState))
 }
