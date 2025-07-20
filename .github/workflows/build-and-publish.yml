@@ -14,9 +14,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Clean dist folder
-      run: rm -rf ./dist
-
     - name: Install NPM dependencies
       run: npm install
 
