@@ -44,19 +44,19 @@ function decrement(type: 'dBatt' | 'aaBatt' | 'volt') {
   <div class="battery-group">
     <div class="button-group">
       <button class="decrement" type="button" @click="decrement('dBatt')">-</button>
-      <span>D Battery: {{ props.dBatt }}</span>
+      <span>D: {{ props.dBatt }}</span>
       <button class="increment" type="button" @click="increment('dBatt')">+</button>
     </div>
 
     <div class="button-group">
       <button class="decrement" type="button" @click="decrement('aaBatt')">-</button>
-      <span>AA Battery: {{ props.aaBatt }}</span>
+      <span>AA: {{ props.aaBatt }}</span>
       <button class="increment" type="button" @click="increment('aaBatt')">+</button>
     </div>
 
     <div class="button-group">
       <button class="decrement" type="button" @click="decrement('volt')">-</button>
-      <span>Voltage: {{ props.volt }}</span>
+      <span>Volt: {{ props.volt }}</span>
       <button class="increment" type="button" @click="increment('volt')">+</button>
     </div>
   </div>
