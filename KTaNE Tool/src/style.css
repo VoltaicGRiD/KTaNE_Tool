@@ -1,3 +1,100 @@
+/* Boss Tracker Styles */
+.boss-tracker {
+  background: #181a20;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  padding: 1em;
+  margin: 0 auto;;
+  max-width: 600;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5em;
+  overflow-y: scroll;
+}
+
+.boss-tracker h2 {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-size: 2em;
+  letter-spacing: 1px;
+  color: #7fa7ff;
+  text-align: center;
+}
+
+.boss-tracker input {
+  padding: 0.5em 1em;
+  margin-bottom: 0.5em;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #23262e;
+  color: #fff;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.boss-tracker input:focus {
+  border-color: #7fa7ff;
+}
+
+.boss-tracker button {
+  background: #535bf2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1em;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(83,91,242,0.12);
+}
+
+.boss-tracker .remove-state-button {
+  background: #ff4d4d;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5em 1em;
+  margin-left: 0.5em;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.boss-tracker ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.boss-tracker > ul > li {
+  background: #23262e;
+  border-radius: 8px;
+  margin-bottom: 0.5em;
+  padding: 1em;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.boss-tracker > ul > li:last-child {
+  margin-bottom: 0.3em; /* Reduced vertical spacing for last item */
+}
+.boss-tracker strong {
+  color: #ffd166;
+  font-size: 1.1em;
+  letter-spacing: 0.5px;
+}
+.boss-tracker ul ul {
+  margin-top: 0.5em;
+  margin-left: 1em;
+}
+.boss-tracker ul ul li {
+  color: #b3c7f9;
+  font-size: 0.98em;
+  padding: 0em 0;
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -27,7 +124,7 @@ body {
   display: flex;
   place-items: center;
   min-width: 320px;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 h1 {
@@ -54,10 +151,20 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  font-size: 1.2em;
+  color: #fff;
+  margin-top: 1em;
+}
+
 #app {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 1rem;
   text-align: center;
   align-content: start;
   justify-content: center;
@@ -87,6 +194,10 @@ button:focus-visible {
   span {
     min-width: 100px;
   }
+}
+
+.strikes-group {
+  margin-bottom: 0.5em;
 }
 
 .battery-group {
@@ -354,18 +465,35 @@ button:focus-visible {
   }
 }
 
+.ktane-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #fff;
+  font-size: 1.2em;
+  margin-top: 1em;
+}
+
+.ktane-logo {
+  width: 50px;
+  height: auto;
+  margin: 1em auto;
+}
+
 .mobile-template {
   display: flex;
   gap: 1em;
   flex-direction: row;
   flex-wrap: wrap;
   font-size: 0.9em;
-  height: 100vh;
   align-self: flex-start;
   justify-content: center;
   align-items: flex-start;
   align-content: flex-start;
   margin-top: 1em;
+  height: 90vh;
 
   .column {
     display: flex;

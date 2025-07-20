@@ -1,23 +1,42 @@
 <script setup lang="ts">
-import MainScreen from './components/MainScreen.vue'
-import PWABadge from './components/PWABadge.vue'
+
+import { ref, provide } from 'vue'
+import { globalState } from './store/globalStore'
+
 import HorizontalScrollContainer from './components/HorizontalScrollContainer.vue'
+import MainScreen from './components/MainScreen.vue'
+import SettingsPage from './components/SettingsPage.vue'
+import NotesPage from './components/NotesPage.vue'
+import FavoritesPage from './components/FavoritesPage.vue'
+import CalculatorPage from './components/CalculatorPage.vue'
+import BossTracker from './components/BossTracker.vue'
+import ReferencePage from './components/ReferencePage.vue'
 
 // Set to true to use horizontal scrolling, false for the current layout
+
+// Provide the global state to all child components
+provide('globalState', globalState)
+
 const useHorizontalScrolling = true
+
+const currentPage = ref(0)
+const scrollComponents = [
+  { name: 'Stats', component: MainScreen },
+  { name: 'Tracker', component: BossTracker },
+  { name: 'Notes', component: NotesPage },
+  { name: 'Favorites', component: FavoritesPage },
+  { name: 'Reference', component: ReferencePage },
+]
 </script>
 
 <template>
   <div v-if="useHorizontalScrolling">
-    <HorizontalScrollContainer />
-    <PWABadge />
+    <HorizontalScrollContainer :components="scrollComponents" />
   </div>
   <div v-else>
     <MainScreen msg="KTaNE Tool" />
-    <PWABadge />
   </div>
 </template>
-
 <style scoped>
 .logo {
   height: 6em;

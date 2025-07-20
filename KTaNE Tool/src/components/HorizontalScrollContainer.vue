@@ -10,15 +10,9 @@ import ReferencePage from './ReferencePage.vue'
 const scrollContainer = ref<HTMLElement | null>(null)
 const currentPage = ref(0)
 
-// You can add more components here
-const components = [
-  { name: 'KTaNE Tool', component: MainScreen },
-  { name: 'Notes', component: NotesPage },
-  { name: 'Favorites', component: FavoritesPage },
-  { name: 'Reference', component: ReferencePage },
-  { name: 'Settings', component: SettingsPage },
-  // Add more components as needed
-]
+const Props = defineProps<{
+  components: Array<{ name: string, component: any }>
+}>()
 
 function scrollToPage(index: number) {
   if (scrollContainer.value) {

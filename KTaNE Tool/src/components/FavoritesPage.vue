@@ -39,13 +39,14 @@ const width = ref(window.innerWidth)
 
 <template>
   <div v-if="width < 600" class="mobile-favorites">
+    <h1>Favorites</h1>
+    
     <a href="https://ktane.timwi.de/" target="_blank" rel="noopener noreferrer" class="ktane-link">
       <img :src="ktaneLogo" alt="KTaNE Logo" class="ktane-logo" />
       <span class="ktane-link-text">KTaNE Module Repository</span>
     </a>
 
     <div class="favorites">
-      <h2>Favorites</h2>
       
       <div class="button-group">
         <input 

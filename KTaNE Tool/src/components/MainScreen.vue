@@ -1,56 +1,35 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, provide } from 'vue'
+import { ref, computed, onMounted, onUnmounted, provide, inject} from 'vue'
 import BatteryGroup from './BatteryGroup.vue';
 import PortsGroup from './PortsGroup.vue';
+import { resetGlobalState } from '../store/globalStore';
 
 defineProps<{ msg: string }>()
 
 // Import or define the path to your KTaNE logo image
 const ktaneLogo = new URL('../assets/ktane-logo.png', import.meta.url).href
 
-const dBatt = ref(0)
-const aaBatt = ref(0)
-const volt = ref(0)
-const serial = ref('')
-const ports = ref({
-  DVI: 0,
-  Parallel: 0,
-  Serial: 0,
-  PS2: 0,
-  RJ45: 0,
-  RCA: 0,
-  EMPTY: 0
-})
-const timer = ref<number>(0)
+// Define the type for globalState
+interface GlobalState {
+  dBatt: any
+  aaBatt: any
+  volt: any
+  strikes: any
+  serial: any
+  ports: any
+  timer: any
+  litIndicators: any
+  unlitIndicators: any
+}
+
+const globalState = inject<GlobalState>('globalState')!
+
+
 const timerInterval = ref<number | null>(null)
 const isTimerRunning = ref(false)
 
-const litIndicators = ref<string[]>([])
-const unlitIndicators = ref<string[]>([])
-
-const FAVORITES_KEY = 'ktane-favorites'
-const favorites = ref<string[]>([])
-
-function loadFavorites() {
-  const data = localStorage.getItem(FAVORITES_KEY)
-  favorites.value = data ? JSON.parse(data) : []
-}
-
-function saveFavorites() {
-  localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites.value))
-}
-
-function addFavorite(link: string) {
-  if (!favorites.value.includes(link)) {
-    favorites.value.push(link)
-    saveFavorites()
-  }
-}
-
-function removeFavorite(link: string) {
-  favorites.value = favorites.value.filter(l => l !== link)
-  saveFavorites()
-}
+const litIndicators = globalState.litIndicators
+const unlitIndicators = globalState.unlitIndicators
 
 const allIndicators = [
   'SND', 'CLR', 'CAR', 'IND', 'FRQ', 'SIG', 'NSA', 'MSA', 'TRN', 'BOB', 'FRK',
@@ -58,10 +37,9 @@ const allIndicators = [
 const showIndicatorModal = ref(false)
 const indicatorIsLit = ref(true)
 const availableIndicators = computed(() => {
-  return allIndicators.filter(ind => !unlitIndicators.value.includes(ind) && !litIndicators.value.includes(ind))
+  return allIndicators.filter(ind => !globalState.unlitIndicators.includes(ind) && !globalState.litIndicators.includes(ind))
 })
 
-const newFavorite = ref('')
 
 function openIndicatorModal(isLit: boolean) {
   indicatorIsLit.value = isLit
@@ -73,27 +51,18 @@ function closeIndicatorModal() {
 }
 
 function addLitIndicator(ind: string) {
-  litIndicators.value.push(ind)
+  globalState.litIndicators.push(ind)
   closeIndicatorModal()
 }
 
 function addUnlitIndicator(ind: string) {
-  unlitIndicators.value.push(ind)
+  globalState.unlitIndicators.push(ind)
   closeIndicatorModal()
 }
 
 function resetAll() {
-  dBatt.value = 0
-  aaBatt.value = 0
-  volt.value = 0
-  serial.value = ''
-  litIndicators.value = []
-  unlitIndicators.value = []
-  Object.keys(ports.value).forEach(port => {
-    ports.value[port as keyof typeof ports.value] = 0
-  })
   stopTimer()
-  timer.value = 0
+  resetGlobalState()
   // Note: Not clearing favorites as they should persist
 }
 
@@ -101,7 +70,7 @@ function startTimer() {
   if (!isTimerRunning.value) {
     isTimerRunning.value = true
     timerInterval.value = window.setInterval(() => {
-      timer.value--
+      globalState.timer.value--
     }, 1000)
   }
 }
@@ -116,7 +85,7 @@ function stopTimer() {
 
 function resetTimer() {
   stopTimer()
-  timer.value = 0
+  globalState.timer.value = 0
 }
 
 function confirmReset() {
@@ -125,17 +94,13 @@ function confirmReset() {
   }
 }
 
-onMounted(() => {
-  loadFavorites()
-})
-
 onUnmounted(() => {
   stopTimer()
 })
 
 // Provide timer data for child components
 provide('timer', {
-  value: timer,
+  value: globalState.timer,
   isRunning: isTimerRunning,
   start: startTimer,
   stop: stopTimer,
@@ -168,19 +133,25 @@ window.addEventListener('resize', () => {
     <div class="mobile-template" v-if="width < 700">
       <div>
         <BatteryGroup
-          :dBatt="dBatt"
-          :aaBatt="aaBatt"
-          :volt="volt"
-          @update:dBatt="dBatt = $event"
-          @update:aaBatt="aaBatt = $event"
-          @update:volt="volt = $event"
+          :dBatt="globalState.dBatt"
+          :aaBatt="globalState.aaBatt"
+          :volt="globalState.volt"
+          @update:dBatt="globalState.dBatt = $event"
+          @update:aaBatt="globalState.aaBatt = $event"
+          @update:volt="globalState.volt = $event"
         ></BatteryGroup>
+
+        <div class="button-group strikes-group">
+          <button class="decrement" type="button" @click="globalState.strikes--">-</button>
+          <span>Strikes: {{ globalState.strikes }}</span>
+          <button class="increment" type="button" @click="globalState.strikes++">+</button>
+        </div>
 
         <div class="column">
           <input
             class="serial-input"
             type="text"
-            v-model="serial"
+            v-model="globalState.serial"
             placeholder="Serial Number"
             maxlength="6"
           />
@@ -189,7 +160,7 @@ window.addEventListener('resize', () => {
             <input 
               class="timer-input"
               type="number"
-              v-model="timer"
+              v-model="globalState.timer"
               placeholder="Timer (seconds)"
               min="0"
               step="30"
@@ -197,7 +168,7 @@ window.addEventListener('resize', () => {
             />
 
             <span class="timer-label" v-if="isTimerRunning">
-              {{ Math.floor(timer / 60).toString().padStart(2, '0') + ':' + (timer % 60).toString().padStart(2, '0') }}
+              {{ Math.floor(globalState.timer / 60).toString().padStart(2, '0') + ':' + (globalState.timer % 60).toString().padStart(2, '0') }}
             </span>
             
             <button 
@@ -226,20 +197,20 @@ window.addEventListener('resize', () => {
       </div>
 
       <PortsGroup
-        :DVI="ports.DVI"
-        :Parallel="ports.Parallel"
-        :Serial="ports.Serial"
-        :PS2="ports.PS2"
-        :RJ45="ports.RJ45"
-        :RCA="ports.RCA"
-        :EMPTY="ports.EMPTY"
-        @update:DVI="ports.DVI = $event"
-        @update:Parallel="ports.Parallel = $event"
-        @update:Serial="ports.Serial = $event"
-        @update:PS2="ports.PS2 = $event"
-        @update:RJ45="ports.RJ45 = $event"
-        @update:RCA="ports.RCA = $event"
-        @update:EMPTY="ports.EMPTY = $event"
+        :DVI="globalState.ports.DVI"
+        :Parallel="globalState.ports.Parallel"
+        :Serial="globalState.ports.Serial"
+        :PS2="globalState.ports.PS2"
+        :RJ45="globalState.ports.RJ45"
+        :RCA="globalState.ports.RCA"
+        :EMPTY="globalState.ports.EMPTY"
+        @update:DVI="globalState.ports.DVI = $event"
+        @update:Parallel="globalState.ports.Parallel = $event"
+        @update:Serial="globalState.ports.Serial = $event"
+        @update:PS2="globalState.ports.PS2 = $event"
+        @update:RJ45="globalState.ports.RJ45 = $event"
+        @update:RCA="globalState.ports.RCA = $event"
+        @update:EMPTY="globalState.ports.EMPTY = $event"
       ></PortsGroup>
 
       <div class="bottom-section">
@@ -260,7 +231,7 @@ window.addEventListener('resize', () => {
               class="lit"
               v-for="ind in litIndicators"
               :key="ind"
-              @click="litIndicators = litIndicators.filter(i => i !== ind)"
+              @click="globalState.litIndicators.splice(globalState.litIndicators.indexOf(ind), 1)"
               style="cursor: pointer;"
               title="Click to remove"
             >
@@ -274,7 +245,7 @@ window.addEventListener('resize', () => {
               class="unlit"
               v-for="ind in unlitIndicators"
               :key="ind"
-              @click="unlitIndicators = unlitIndicators.filter(i => i !== ind)"
+              @click="globalState.unlitIndicators.splice(globalState.unlitIndicators.indexOf(ind), 1)"
               style="cursor: pointer;"
               title="Click to remove"
             >
@@ -282,26 +253,34 @@ window.addEventListener('resize', () => {
             </li>
           </ul>
         </div>
+
+        <hr style="width: 100%; border: 1px solid #ccc;"/>
+
+        <div class="stats">
+          <span v-if="['A','E','I','O','U'].includes(globalState.serial[0])">Contains vowel</span>
+          <span>Sum of numbers: {{ globalState.serial.split('').reduce((acc: number, curr: number) => acc + (parseInt(curr) || 0), 0) }}</span>
+          <span>Product of numbers: {{ globalState.serial.split('').reduce((acc: number, curr: number) => acc * (parseInt(curr) || 1), 1) }}</span>
+        </div>
       </div>
     </div>
     <div class="desktop-template" v-else>
       <div class="battery-group">
         <div class="button-group">
-          <button class="decrement" type="button" @click="dBatt--">-</button>
-          <span>D Battery: {{ dBatt }}</span>
-          <button class="increment" type="button" @click="dBatt++">+</button>
+          <button class="decrement" type="button" @click="globalState.dBatt--">-</button>
+          <span>D Battery: {{ globalState.dBatt }}</span>
+          <button class="increment" type="button" @click="globalState.dBatt++">+</button>
         </div>
 
         <div class="button-group">
-          <button class="decrement" type="button" @click="aaBatt--">-</button>
-          <span>AA Battery: {{ aaBatt }}</span>
-          <button class="increment" type="button" @click="aaBatt++">+</button>
+          <button class="decrement" type="button" @click="globalState.aaBatt--">-</button>
+          <span>AA Battery: {{ globalState.aaBatt }}</span>
+          <button class="increment" type="button" @click="globalState.aaBatt++">+</button>
         </div>
 
         <div class="button-group">
-          <button class="decrement" type="button" @click="volt--">-</button>
-          <span>Voltage: {{ volt }}</span>
-          <button class="increment" type="button" @click="volt++">+</button>
+          <button class="decrement" type="button" @click="globalState.volt--">-</button>
+          <span>Voltage: {{ globalState.volt }}</span>
+          <button class="increment" type="button" @click="globalState.volt++">+</button>
         </div>
       </div>
 
@@ -309,7 +288,7 @@ window.addEventListener('resize', () => {
         <input
           class="serial-input"
           type="text"
-          v-model="serial"
+          v-model="globalState.serial"
           placeholder="Serial Number"
           maxlength="6"
         />
@@ -335,53 +314,21 @@ window.addEventListener('resize', () => {
             <li class="unlit" v-for="ind in unlitIndicators" :key="ind">{{ ind }}</li>
           </ul>
         </div>
-
-        <a href="https://ktane.timwi.de/" target="_blank" rel="noopener noreferrer" class="ktane-link">
-          <img :src="ktaneLogo" alt="KTaNE Logo" class="ktane-logo" />
-          <span class="ktane-link-text">KTaNE Module Repository</span>
-        </a>
-
-        <div class="favorites">
-          <h2>Favorites</h2>
-          
-          <div class="button-group">
-            <input 
-              v-model="newFavorite"
-              type="text"
-              placeholder="Add a favorite link"
-              @keyup.enter="addFavorite(newFavorite); newFavorite = ''"
-            />
-            <button @click="addFavorite(newFavorite); newFavorite = ''">Add</button>
-          </div>
-
-          <ul class="favorites-list">
-            <li class="favorite-item" v-for="link in favorites" :key="link">
-              <a :href="link" target="_blank" rel="noopener noreferrer">
-                {{
-                link.split('/').pop()?.split('.')[0]
-                  .replace(/_/g, ' ')
-                  .replace(/\b\w/g, c => c.toUpperCase())
-                }}
-              </a>
-              <button @click="removeFavorite(link)">X</button>
-            </li>
-          </ul>
-        </div>
       </div>
 
       <div class="port-group">
-        <label v-for="(count, port) in ports" :key="port">
+        <label v-for="(count, port) in globalState.ports" :key="port">
           <div class="button-group">
             <button
               class="decrement"
               type="button"
-              @click="ports[port]--"
+              @click="globalState.ports[port]--"
             >-</button>
             <span>{{ port }}: {{ count }}</span>
             <button
               class="increment"
               type="button"
-              @click="ports[port]++"
+              @click="globalState.ports[port]++"
             >+</button>
           </div>
         </label>
