@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 import HorizontalScrollContainer from './HorizontalScrollContainer.vue'
 import MorseCodeTranslator from './MorseCodeTranslator.vue';
 import PortsReference from './PortsReference.vue';

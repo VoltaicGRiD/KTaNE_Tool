@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, inject } from 'vue'
+import { ref, inject } from 'vue'
 
 const globalState = inject('globalState') as {
   trackers: [string, string[]][]

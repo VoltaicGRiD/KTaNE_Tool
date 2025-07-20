@@ -1,14 +1,12 @@
 <script setup lang="ts">
 
-import { ref, provide } from 'vue'
+import { provide } from 'vue'
 import { globalState } from './store/globalStore'
 
 import HorizontalScrollContainer from './components/HorizontalScrollContainer.vue'
 import MainScreen from './components/MainScreen.vue'
-import SettingsPage from './components/SettingsPage.vue'
 import NotesPage from './components/NotesPage.vue'
 import FavoritesPage from './components/FavoritesPage.vue'
-import CalculatorPage from './components/CalculatorPage.vue'
 import BossTracker from './components/BossTracker.vue'
 import ReferencePage from './components/ReferencePage.vue'
 
@@ -19,7 +17,6 @@ provide('globalState', globalState)
 
 const useHorizontalScrolling = true
 
-const currentPage = ref(0)
 const scrollComponents = [
   { name: 'Stats', component: MainScreen },
   { name: 'Tracker', component: BossTracker },

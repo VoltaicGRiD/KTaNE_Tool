@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, provide, inject} from 'vue'
+import { ref, computed, onUnmounted, provide, inject} from 'vue'
 import BatteryGroup from './BatteryGroup.vue';
 import PortsGroup from './PortsGroup.vue';
 import { resetGlobalState } from '../store/globalStore';
 
 defineProps<{ msg: string }>()
 
-// Import or define the path to your KTaNE logo image
-const ktaneLogo = new URL('../assets/ktane-logo.png', import.meta.url).href
 
 // Define the type for globalState
 interface GlobalState {
@@ -258,8 +256,8 @@ window.addEventListener('resize', () => {
 
         <div class="stats">
           <span v-if="['A','E','I','O','U'].includes(globalState.serial[0])">Contains vowel</span>
-          <span>Sum of numbers: {{ globalState.serial.split('').reduce((acc: number, curr: number) => acc + (parseInt(curr) || 0), 0) }}</span>
-          <span>Product of numbers: {{ globalState.serial.split('').reduce((acc: number, curr: number) => acc * (parseInt(curr) || 1), 1) }}</span>
+          <span>Sum of numbers: {{ globalState.serial.split('').reduce((acc: number, curr: string) => acc + (parseInt(curr) || 0), 0) }}</span>
+          <span>Product of numbers: {{ globalState.serial.split('').reduce((acc: number, curr: string) => acc * (parseInt(curr) || 1), 1) }}</span>
         </div>
       </div>
     </div>

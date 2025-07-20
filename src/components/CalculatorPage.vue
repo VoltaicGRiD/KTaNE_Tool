@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import MainScreen from './MainScreen.vue'
+import { ref } from 'vue'
 
 const input = ref<number | null>(null)
 const result = ref<number | null>(null)
-
-const timer = ref<number | null>(null)
 
 function calculate() {
   if (input.value !== null) {

@@ -1,16 +1,11 @@
 <script setup lang="ts">
+
 import { ref, onMounted } from 'vue'
-import MainScreen from './MainScreen.vue'
-import SettingsPage from './SettingsPage.vue'
-import NotesPage from './NotesPage.vue'
-import FavoritesPage from './FavoritesPage.vue'
-import CalculatorPage from './CalculatorPage.vue'
-import ReferencePage from './ReferencePage.vue'
 
 const scrollContainer = ref<HTMLElement | null>(null)
 const currentPage = ref(0)
 
-const Props = defineProps<{
+defineProps<{
   components: Array<{ name: string, component: any }>
 }>()
 
