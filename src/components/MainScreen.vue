@@ -266,6 +266,36 @@ window.addEventListener('resize', () => {
           </button>
         </div>
 
+        <div class="indicators">
+          <h2>Lit Indicators</h2>
+          <ul class="lit-indicators">
+            <li
+              class="lit"
+              v-for="ind in litIndicators"
+              :key="ind"
+              @click="globalState.litIndicators.splice(globalState.litIndicators.indexOf(ind), 1)"
+              style="cursor: pointer;"
+              title="Click to remove"
+            >
+              {{ ind }}
+            </li>
+          </ul>
+
+          <h2>Unlit Indicators</h2>
+          <ul class="unlit-indicators">
+            <li
+              class="unlit"
+              v-for="ind in unlitIndicators"
+              :key="ind"
+              @click="globalState.unlitIndicators.splice(globalState.unlitIndicators.indexOf(ind), 1)"
+              style="cursor: pointer;"
+              title="Click to remove"
+            >
+              {{ ind }}
+            </li>
+          </ul>
+        </div>
+
         <hr style="width: 100%; border: 1px solid #ccc;"/>
 
         <div class="stats">
@@ -352,7 +382,7 @@ window.addEventListener('resize', () => {
           </button>
         </div>
 
-                <div class="indicators">
+        <div class="indicators">
           <h2>Lit Indicators</h2>
           <ul class="lit-indicators">
             <li

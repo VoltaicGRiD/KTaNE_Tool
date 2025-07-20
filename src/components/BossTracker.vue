@@ -39,7 +39,7 @@ const width = ref(window.innerWidth)
 
 </script>
 <template>
-  <div v-if="width < 600">
+  <div v-if="width < 600" >
     <h1>{{ msg }}</h1>
     <div class="boss-tracker">
       <input v-model="newTrackerName" placeholder="New Tracker Name" />
