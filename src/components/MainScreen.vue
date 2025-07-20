@@ -198,7 +198,7 @@ window.addEventListener('resize', () => {
             maxlength="6"
           />
 
-          <div class="row">
+          <!-- <div class="row">
             <input 
               class="timer-input"
               type="number"
@@ -226,7 +226,7 @@ window.addEventListener('resize', () => {
             >
               Reset
             </button>
-          </div>
+          </div> -->
             
           <button
           class="reset-all"

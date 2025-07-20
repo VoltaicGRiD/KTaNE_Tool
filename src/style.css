@@ -516,7 +516,7 @@ button:focus-visible {
   gap: 1em;
   flex-direction: row;
   flex-wrap: wrap;
-  font-size: 0.8em;
+  font-size: 0.7em;
   align-self: flex-start;
   justify-content: center;
   align-items: flex-start;
