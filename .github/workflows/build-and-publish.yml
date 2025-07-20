@@ -28,7 +28,7 @@ jobs:
     - name: Upload published artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: published-app
+        name: github-pages
         path: ./publish
 
   deploy:
